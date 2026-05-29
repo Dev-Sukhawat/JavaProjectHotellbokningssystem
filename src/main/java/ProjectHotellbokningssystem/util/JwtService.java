@@ -9,14 +9,16 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
 public class JwtService {
     private final SecretKey SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
-    public String generateToken(String username){
+    public String generateToken(String username, List<String> roles){
         Map<String, Object> claims = new HashMap<>();
+        claims.put("roles", roles);
         return Jwts.builder()
                 .claims(claims)
                 .subject(username)
@@ -28,6 +30,11 @@ public class JwtService {
 
     public String extractUsername(String token){
         return extractAllClaims(token).getSubject();
+    }
+
+    public List<String> extractRoles(String token){
+        Claims claims = extractAllClaims(token);
+        return claims.get("roles", List.class);
     }
 
     public boolean isTokenExpired(String token) {
